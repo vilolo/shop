@@ -1,0 +1,79 @@
+<html>
+    <head></head>
+    <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+    <body>
+        <div>
+            <div><button id="btnWeb">网页</button></div>
+            <hr>
+            <div>======成本======</div>
+            <table>
+                <tr>
+                    <td>商品成本(RMB)</td>
+                    <td>: <input></td>
+                </tr>
+
+                <tr>
+                    <td>快递费(RMB)</td>
+                    <td>: <input></td>
+                </tr>
+                <tr>
+                    <td>重量(KG)</td>
+                    <td>: <input id="weight" ><span id="expressFree"></span></td>
+                </tr>
+            </table>
+        </div>
+        <div>
+            <hr>
+            <div>======比例======</div>
+        </div>
+        <div>
+            <hr>
+            <div>得出单价：<span id="res" style="color: red"></span>RM</div>
+        </div>
+    </body>
+    <script>
+        String.prototype.format = function(){
+            var args = arguments;
+            return this.replace(/\{(\d+)\}/gm, function(ms, p1){return typeof(args[p1]) == 'undefined' ? ms : args[p1]});
+        }
+
+        $(function(){
+            
+            $("#btnWeb").on("click", function(){
+                window.open("https://seller.shopee.com.my").location;
+                window.open("https://shopee.com.my").location;
+            });
+
+            function countFree(){
+                var weight = $("#weight").val();
+                var overWeight = weight - 1;
+                var myA = 0;
+                var myB = 0;
+                var myC = 0;
+                
+                if(weight > 0.01){
+                    myA = 6.1;
+                    myB = 8.1;
+                    myC = 8.1;
+                }
+
+                if(overWeight > 0){
+                    var part1 = 0.99 / 0.01 * 0.11;
+                    myA += part1 + overWeight/0.01*0.11;
+                    myB += part1 + overWeight/0.25*1.5;
+                    myC += part1 + overWeight/0.25*2;
+                }else{
+                    myA += (weight-0.01)/0.01*0.11;
+                    myB += (weight-0.01)/0.01*0.11;
+                    myC += (weight-0.01)/0.01*0.11;
+                }
+                $("#expressFree").text("A区：({0}RM);B区：({1}RM);C区:({2}RM);".format(myA,myB,myC));
+
+            }
+
+            $("#weight").on("change", function(){
+                countFree();
+            })
+        })
+    </script>
+</html>
