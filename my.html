@@ -9,16 +9,32 @@
             <table>
                 <tr>
                     <td>商品成本(RMB)</td>
-                    <td>: <input></td>
+                    <td>: <input id="cost" value="50"></td>
                 </tr>
-
                 <tr>
                     <td>快递费(RMB)</td>
-                    <td>: <input></td>
+                    <td>: <input id="expressFee" value="10"></td>
+                </tr>
+                <tr>
+                    <td>盈利比例</td>
+                    <td>: <input id="rate" value="10">%</td>
                 </tr>
                 <tr>
                     <td>重量(KG)</td>
-                    <td>: <input id="weight" ><span id="expressFree"></span></td>
+                    <td>: <input id="weight" value="1"></td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td>
+                        <span id="expressFree"></span>
+                        <input type="hidden" id="myA" value="0">
+                        <input type="hidden" id="myB" value="0">
+                        <input type="hidden" id="myC" value="0">
+                    </td>
+                </tr>
+                <tr>
+                    <td></td>
+                    <td><button id="btn">按回车计算</button></td>
                 </tr>
             </table>
         </div>
@@ -28,7 +44,7 @@
         </div>
         <div>
             <hr>
-            <div>得出单价：<span id="res" style="color: red"></span>RM</div>
+            <div>得出单价： <span id="res" style="color: red">0</span> RM</div>
         </div>
     </body>
     <script>
@@ -38,7 +54,9 @@
         }
 
         $(function(){
-            
+            var rmToRmb = 1.669
+            var rmbToRm = 0.599
+
             $("#btnWeb").on("click", function(){
                 window.open("https://seller.shopee.com.my").location;
                 window.open("https://shopee.com.my").location;
@@ -67,13 +85,56 @@
                     myB += (weight-0.01)/0.01*0.11;
                     myC += (weight-0.01)/0.01*0.11;
                 }
-                $("#expressFree").text("A区：({0}RM);B区：({1}RM);C区:({2}RM);".format(myA,myB,myC));
 
+                myA = Math.round(myA*100)/100
+                myB = Math.round(myB*100)/100
+                myC = Math.round(myC*100)/100
+
+                $("#expressFree").text("A区：({0}RM);B区：({1}RM);C区:({2}RM);".format(myA,myB,myC));
+                $("#myA").val(myA)
+                $("#myB").val(myB)
+                $("#myC").val(myC)
             }
 
             $("#weight").on("change", function(){
                 countFree();
             })
+
+            $("#btn").on("click", function(){
+                countFree();
+
+                var finalPriceA = (parseInt($("#cost").val()) +  
+                parseInt($("#expressFee").val()) +
+                parseInt($("#myA").val()*rmToRmb)
+                ) *
+                (100+parseInt($("#rate").val()))/100*rmbToRm
+
+                var finalPriceB = (parseInt($("#cost").val()) +  
+                parseInt($("#expressFee").val()) +
+                parseInt($("#myB").val()*rmToRmb)
+                ) *
+                (100+parseInt($("#rate").val()))/100*rmbToRm
+
+                var finalPriceC = (parseInt($("#cost").val()) +  
+                parseInt($("#expressFee").val()) +
+                parseInt($("#myC").val()*rmToRmb)
+                ) *
+                (100+parseInt($("#rate").val()))/100*rmbToRm
+                
+                finalPriceA = Math.round(finalPriceA*100)/100
+                finalPriceB = Math.round(finalPriceB*100)/100
+                finalPriceC = Math.round(finalPriceC*100)/100
+
+                $("#res").text("A区：" + finalPriceA + ", B区：" + finalPriceB + "， C区" + finalPriceC)
+            })
+
+            $(document).keyup(function(event){
+                if(event.keyCode ==13){
+                    $("#btn").trigger("click");
+                }
+            });
+
+            countFree();
         })
     </script>
 </html>
