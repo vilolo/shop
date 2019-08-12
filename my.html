@@ -9,19 +9,23 @@
             <table>
                 <tr>
                     <td>商品成本(RMB)</td>
-                    <td>: <input id="cost" value="20"></td>
+                    <td>: <input id="cost" value="18"></td>
+                </tr>
+                <tr>
+                    <td>数量</td>
+                    <td>: <input id="amount" value="1"></td>
                 </tr>
                 <tr>
                     <td>快递费(RMB)</td>
-                    <td>: <input id="expressFee" value="12"></td>
+                    <td>: <input id="expressFee" value="16"></td>
                 </tr>
                 <tr>
                     <td>盈利比例</td>
                     <td>: <input id="rate" value="10">%</td>
                 </tr>
                 <tr>
-                    <td>重量(KG)</td>
-                    <td>: <input id="weight" value="0.4"></td>
+                    <td>单件重量(KG)</td>
+                    <td>: <input id="weight" value="0.4"> 总重量： <span class="totalWeight">0.4</span></td>
                 </tr>
                 <tr>
                     <td></td>
@@ -44,8 +48,11 @@
         </div>
         <div>
             <hr>
-            <div>总成本： <span id="totalCost" style="color: red">0</span> RM</div>
-            <div>得出包邮单价： <span id="res" style="color: red">0</span> RM</div>
+            <div>包邮总成本： <span id="totalCostFreeShip" style="color: red">0</span> RM</div><br>
+            <div>不包邮总成本（-4.8）： <span id="totalCostShip" style="color: red">0</span> RM</div><br>
+            <div>得出包邮单价(<span class='rate_tip'></span>%)： <span id="res" style="color: red">0</span> RM</div>
+            <div>大概扣取佣金(除运费的5%)： <span id="commission" style="color: red">0</span> RM</div>
+            <div>最终得到： <span id="finalGet" style="color: red">0</span> CNY</div>
         </div>
     </body>
     <script>
@@ -55,8 +62,9 @@
         }
 
         $(function(){
-            var rmToRmb = 1.68
-            var rmbToRm = 0.59
+            var rmToRmb = 1.6873
+            var rmbToRm = 0.5927
+            var shipFee = 4.8
 
             $("#btnWeb").on("click", function(){
                 window.open("https://seller.shopee.com.my").location;
@@ -67,7 +75,8 @@
             });
 
             function countFree(){
-                var weight = $("#weight").val();
+                var amount = $("#amount").val()
+                var weight = $("#weight").val()*amount;
                 var overWeight = weight - 1;
                 var myA = 0;
                 var myB = 0;
@@ -95,6 +104,7 @@
                 myC = Math.round(myC*100)/100
 
                 $("#expressFree").text("A区：({0}RM);B区：({1}RM);C区:({2}RM);".format(myA,myB,myC));
+                $(".totalWeight").text(weight)
                 $("#myA").val(myA)
                 $("#myB").val(myB)
                 $("#myC").val(myC)
@@ -107,15 +117,15 @@
             $("#btn").on("click", function(){
                 countFree();
 
-                var totalCostA = (rmbToRm * (parseFloat($("#cost").val()) + parseFloat($("#expressFee").val())) +
+                var totalCostA = (rmbToRm * (parseFloat($("#cost").val()*$("#amount").val()) + parseFloat($("#expressFee").val())) +
                 parseFloat($("#myA").val())
                 )
 
-                var totalCostB = (rmbToRm * (parseFloat($("#cost").val()) + parseFloat($("#expressFee").val())) +
+                var totalCostB = (rmbToRm * (parseFloat($("#cost").val()*$("#amount").val()) + parseFloat($("#expressFee").val())) +
                 parseFloat($("#myB").val())
                 )
 
-                var totalCostC = (rmbToRm * (parseFloat($("#cost").val()) + parseFloat($("#expressFee").val())) +
+                var totalCostC = (rmbToRm * (parseFloat($("#cost").val()*$("#amount").val()) + parseFloat($("#expressFee").val())) +
                 parseFloat($("#myC").val())
                 )
                 
@@ -123,13 +133,31 @@
                 totalCostB = Math.round(totalCostB*100)/100
                 totalCostC = Math.round(totalCostC*100)/100
 
-                $("#totalCost").text("A区：" + finalPriceA + ", B区：" + finalPriceB + "， C区" + finalPriceC)
+                $("#totalCostFreeShip").text("A区：" + totalCostA + ", B区：" + totalCostB + "， C区" + totalCostC)
+                $("#totalCostShip").text("A区：" + Math.round((totalCostA-shipFee)*100)/100 + 
+                    ", B区：" + Math.round((totalCostB-shipFee)*100)/100 + 
+                    "， C区" + Math.round((totalCostC-shipFee)*100)/100)
 
                 var finalPriceA = Math.round(totalCostA*(100+parseFloat($("#rate").val())))/100
                 var finalPriceB = Math.round(totalCostB*(100+parseFloat($("#rate").val())))/100
                 var finalPriceC = Math.round(totalCostC*(100+parseFloat($("#rate").val())))/100
 
                 $("#res").text("A区：" + finalPriceA + ", B区：" + finalPriceB + "， C区" + finalPriceC)
+                $(".rate_tip").text($("#rate").val())
+
+                var commissionA = Math.round((finalPriceA-shipFee)*5)/100
+                var commissionB = Math.round((finalPriceB-shipFee)*5)/100
+                var commissionC = Math.round((finalPriceC-shipFee)*5)/100
+                $("#commission").text("A区：" + commissionA + 
+                    ", B区：" + commissionB + 
+                    "， C区" + commissionC)
+
+                var finalGetA = finalPriceA - commissionA - totalCostA
+                var finalGetB = finalPriceB - commissionB - totalCostB
+                var finalGetC = finalPriceC - commissionC - totalCostC
+                $("#finalGet").text("A区：" + Math.round(finalGetA*rmToRmb*100)/100 + "(" + Math.round(finalGetA/totalCostA*100) + "%)" +
+                    ", B区：" + Math.round(finalGetB*rmToRmb*100)/100 + "(" + Math.round(finalGetB/totalCostB*100) + "%)" + 
+                    "， C区" + Math.round(finalGetC*rmToRmb*100)/100 + "(" + Math.round(finalGetC/totalCostC*100) + "%)")
             })
 
             $(document).keyup(function(event){
