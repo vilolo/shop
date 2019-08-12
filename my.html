@@ -9,11 +9,11 @@
             <table>
                 <tr>
                     <td>商品成本(RMB)</td>
-                    <td>: <input id="cost" value="50"></td>
+                    <td>: <input id="cost" value="20"></td>
                 </tr>
                 <tr>
                     <td>快递费(RMB)</td>
-                    <td>: <input id="expressFee" value="10"></td>
+                    <td>: <input id="expressFee" value="12"></td>
                 </tr>
                 <tr>
                     <td>盈利比例</td>
@@ -21,7 +21,7 @@
                 </tr>
                 <tr>
                     <td>重量(KG)</td>
-                    <td>: <input id="weight" value="1"></td>
+                    <td>: <input id="weight" value="0.4"></td>
                 </tr>
                 <tr>
                     <td></td>
@@ -44,7 +44,8 @@
         </div>
         <div>
             <hr>
-            <div>得出单价： <span id="res" style="color: red">0</span> RM</div>
+            <div>总成本： <span id="totalCost" style="color: red">0</span> RM</div>
+            <div>得出包邮单价： <span id="res" style="color: red">0</span> RM</div>
         </div>
     </body>
     <script>
@@ -54,12 +55,15 @@
         }
 
         $(function(){
-            var rmToRmb = 1.669
-            var rmbToRm = 0.599
+            var rmToRmb = 1.68
+            var rmbToRm = 0.59
 
             $("#btnWeb").on("click", function(){
                 window.open("https://seller.shopee.com.my").location;
+                window.open("https://www.1688.com").location;
                 window.open("https://shopee.com.my").location;
+                window.open("https://fanyi.baidu.com/").location;
+                window.open("https://docs.google.com/spreadsheets/d/13DCV3qM64u4vf9EjIpXBXCs7oF8c60-2xPWqSrtTIVY/edit?ts=5d3c11d2#gid=0").location;
             });
 
             function countFree(){
@@ -70,20 +74,20 @@
                 var myC = 0;
                 
                 if(weight > 0.01){
-                    myA = 6.1;
-                    myB = 8.1;
-                    myC = 8.1;
+                    myA = 3.95;
+                    myB = 4.95;
+                    myC = 4.95;
                 }
 
                 if(overWeight > 0){
-                    var part1 = 0.99 / 0.01 * 0.11;
-                    myA += part1 + overWeight/0.01*0.11;
-                    myB += part1 + overWeight/0.25*1.5;
-                    myC += part1 + overWeight/0.25*2;
+                    var part1 = 0.99 / 0.01 * 0.15;
+                    myA += part1 + overWeight/0.01*0.15;
+                    myB += part1 + overWeight/0.01*0.15 + overWeight/0.25*1.5;
+                    myC += part1 + overWeight/0.01*0.15 + overWeight/0.25*1.5;
                 }else{
-                    myA += (weight-0.01)/0.01*0.11;
-                    myB += (weight-0.01)/0.01*0.11;
-                    myC += (weight-0.01)/0.01*0.11;
+                    myA += (weight-0.01)/0.01*0.15;
+                    myB += (weight-0.01)/0.01*0.15;
+                    myC += (weight-0.01)/0.01*0.15;
                 }
 
                 myA = Math.round(myA*100)/100
@@ -103,27 +107,27 @@
             $("#btn").on("click", function(){
                 countFree();
 
-                var finalPriceA = (parseInt($("#cost").val()) +  
-                parseInt($("#expressFee").val()) +
-                parseInt($("#myA").val()*rmToRmb)
-                ) *
-                (100+parseInt($("#rate").val()))/100*rmbToRm
+                var totalCostA = (rmbToRm * (parseFloat($("#cost").val()) + parseFloat($("#expressFee").val())) +
+                parseFloat($("#myA").val())
+                )
 
-                var finalPriceB = (parseInt($("#cost").val()) +  
-                parseInt($("#expressFee").val()) +
-                parseInt($("#myB").val()*rmToRmb)
-                ) *
-                (100+parseInt($("#rate").val()))/100*rmbToRm
+                var totalCostB = (rmbToRm * (parseFloat($("#cost").val()) + parseFloat($("#expressFee").val())) +
+                parseFloat($("#myB").val())
+                )
 
-                var finalPriceC = (parseInt($("#cost").val()) +  
-                parseInt($("#expressFee").val()) +
-                parseInt($("#myC").val()*rmToRmb)
-                ) *
-                (100+parseInt($("#rate").val()))/100*rmbToRm
+                var totalCostC = (rmbToRm * (parseFloat($("#cost").val()) + parseFloat($("#expressFee").val())) +
+                parseFloat($("#myC").val())
+                )
                 
-                finalPriceA = Math.round(finalPriceA*100)/100
-                finalPriceB = Math.round(finalPriceB*100)/100
-                finalPriceC = Math.round(finalPriceC*100)/100
+                totalCostA = Math.round(totalCostA*100)/100
+                totalCostB = Math.round(totalCostB*100)/100
+                totalCostC = Math.round(totalCostC*100)/100
+
+                $("#totalCost").text("A区：" + finalPriceA + ", B区：" + finalPriceB + "， C区" + finalPriceC)
+
+                var finalPriceA = Math.round(totalCostA*(100+parseFloat($("#rate").val())))/100
+                var finalPriceB = Math.round(totalCostB*(100+parseFloat($("#rate").val())))/100
+                var finalPriceC = Math.round(totalCostC*(100+parseFloat($("#rate").val())))/100
 
                 $("#res").text("A区：" + finalPriceA + ", B区：" + finalPriceB + "， C区" + finalPriceC)
             })
