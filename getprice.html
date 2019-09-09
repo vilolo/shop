@@ -1,0 +1,199 @@
+<html>
+    <body>
+        <div style="padding-left: 100px; padding-bottom: 30px; padding-top: 30px;">
+            <label><input type="radio" name="proform" value="my"> 马来 </label>
+            <label><input type="radio" name="proform" value="tw"> 台湾 </label>
+            <br><br>
+            1RMB = <input id="rmbtomyr" value="0.5865">马来币
+            <br>
+            1RMB = <input id="rmbtotwd" value="4.3822">新台币
+            <br><br>
+            <button id="btn">按回车计算</button>
+        </div>
+
+        <table>
+            <tr>
+                <td>货源成本</td><td>：<input id="cost" value="20"> RMB</td>
+            </tr><tr>
+                <td>数量</td><td>：<input id="amount" value="1"></td>
+            </tr><tr>
+                <td>国内运费</td><td>：<input id="domestic_shipping" value="15"> RMB</td>
+            </tr><tr>
+                <td>单个重量</td><td>：<input id="single_weight" value="0.5"> KG (总重量：<span id="total_weight">0</span>KG)</td>
+            </tr><tr>
+                <td>国际实际运费</td><td>：<span id="international_shipping">0</span> <span class="unit">--</span></td>
+            </tr><tr>
+                <td>买家支付运费</td><td>：<input id="buyer_shipping" value="60"> <span class="unit">--</span></td>
+            </tr><tr>
+                <td>盈利比率</td><td>：<input id="profit_ratio" value="20">%</td>
+            </tr><tr>
+                <td>+++包邮+++</td><td>++++包邮++++</td>
+            </tr><tr>
+                <td>包邮总成本</td><td><span id="no_shipping_cost">0</span> <span class="unit">--</span> <br>== (<span id="no_shipping_cost_rmb">0</span> RMB)</td>
+            </tr><tr>
+                <td style="border: 1px #000 solid">得出包邮定价</td><td style="border: 1px #000 solid; color: red"><span id="no_shipping_price">0</span> <span class="unit">--</span> <br>== (<span id="no_shipping_price_rmb">0</span> RMB)</td>
+            </tr><tr>
+                <td>佣金加服务费（6%+2%）</td><td>：<span id="no_shipping_service_charge">0</span> RMB</td>
+            </tr><tr>
+                <td>预计收益</td><td>：<span id="no_shipping_profit">0</span> RMB</td>
+            </tr><tr>
+                <td>+++不包邮+++</td><td>++++不包邮++++</td>
+            </tr><tr>
+                <td>不包邮总成本</td><td><span id="shipping_cost">0</span> <span class="unit">--</span> <br>== (<span id="shipping_price_rmb">0</span> RMB)</td>
+            </tr><tr>
+                <td>得出不包邮定价</td><td><span id="shipping_price">0</span> <span class="unit">--</span> <br>== (<span id="shipping_price_rmb">0</span> RMB)</td>
+            </tr><tr>
+                <td>佣金加服务费（6%+2%）</td><td>：<span id="shipping_service_charge">0</span> RMB</td>
+            </tr><tr>
+                <td>预计收益</td><td>：<span id="shipping_profit">0</span> RMB</td>
+            </tr>
+        </table>
+    </body>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+    <script>
+        String.format = function(src){    
+            if (arguments.length == 0) return null;    
+            var args = Array.prototype.slice.call(arguments, 1);    
+            return src.replace(/\{(\d+)\}/g, function(m, i){    
+                return args[i];    
+            });    
+        };  
+
+        var pu_home_shipping = 85;
+        var pu_shop_shipping = 75;
+        var te_home_shipping = 105;
+        var te_shop_shipping = 95;
+        
+        function twShipping(weight){
+            pu_home_shipping = 85;
+            pu_shop_shipping = 75;
+            te_home_shipping = 105;
+            te_shop_shipping = 95;
+
+            if(weight > 0.5){
+                over_weight = weight - 0.5;
+                pu_over_shipping = Math.ceil(over_weight*10/5)*30;
+                pu_home_shipping += pu_over_shipping;
+                pu_shop_shipping += pu_over_shipping;
+
+                te_over_shipping = Math.ceil(over_weight*10/5)*40;
+                te_home_shipping += te_over_shipping;
+                te_shop_shipping += te_over_shipping;
+            }
+
+            $("#international_shipping").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , pu_home_shipping, pu_shop_shipping, te_home_shipping, te_shop_shipping));
+        }
+
+        twShipping(total_weight);
+
+        var amount = $("#amount").val();
+        var total_weight = 0;
+
+        function countTotalWeight(single_weight, amount){
+            total_weight = single_weight * amount;
+            $("#total_weight").text(total_weight);
+            twShipping(total_weight);
+        }
+
+        countTotalWeight($("#single_weight").val(), amount);
+
+        $("#single_weight").on('change', function(){
+            countTotalWeight($("#single_weight").val(), amount);
+        });
+
+        $("#amount").on('change', function(){
+            amount = $("#amount").val();
+            countTotalWeight($("#single_weight").val(), amount);
+        });
+
+        var unit = "";
+        var exchange_rate = "";
+        var shipping_text = "";
+
+        $("input[name='proform']").on('change', function(data){
+            if($(this).val() == "tw"){
+                unit = "TWD";
+                exchange_rate = $("#rmbtotwd").val();
+            }else{
+                unit = "MYR";
+                exchange_rate = $("#rmbtomyr").val();
+            }
+            $('.unit').text(unit);
+        });
+
+        $(":radio[value='tw']").attr('checked', 'true');
+        unit = "TWD";
+        exchange_rate = $("#rmbtotwd").val();
+        $('.unit').text(unit);
+
+        function countFinal(){
+            var rmb_cost = (parseFloat(amount*$('#cost').val())+parseFloat($('#domestic_shipping').val()));
+
+            //不包邮成本
+            no_shipping_cost_pu_home = rmb_cost*exchange_rate + pu_home_shipping;
+            no_shipping_cost_pu_shop = rmb_cost*exchange_rate + pu_shop_shipping;
+            no_shipping_cost_te_home = rmb_cost*exchange_rate + te_home_shipping;
+            no_shipping_cost_te_shop = rmb_cost*exchange_rate + te_shop_shipping;
+
+            $("#no_shipping_cost").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , no_shipping_cost_pu_home, no_shipping_cost_pu_shop, no_shipping_cost_te_home, no_shipping_cost_te_shop));
+
+            $("#no_shipping_cost_rmb").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , Math.round(no_shipping_cost_pu_home/exchange_rate*100)/100, 
+            Math.round(no_shipping_cost_pu_shop/exchange_rate*100)/100, 
+            Math.round(no_shipping_cost_te_home/exchange_rate*100)/100, 
+            Math.round(no_shipping_cost_te_shop/exchange_rate*100)/100));
+
+            
+            var no_shipping_cost_pu_home_price = Math.round(no_shipping_cost_pu_home*(100+parseInt($('#profit_ratio').val())))/100;
+            var no_shipping_cost_pu_shop_price = Math.round(no_shipping_cost_pu_shop*(100+parseInt($('#profit_ratio').val())))/100; 
+            var no_shipping_cost_te_home_price = Math.round(no_shipping_cost_te_home*(100+parseInt($('#profit_ratio').val())))/100; 
+            var no_shipping_cost_te_shop_price = Math.round(no_shipping_cost_te_shop*(100+parseInt($('#profit_ratio').val())))/100;
+
+            $("#no_shipping_price").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , no_shipping_cost_pu_home_price, 
+            no_shipping_cost_pu_shop_price, 
+            no_shipping_cost_te_home_price, 
+            no_shipping_cost_te_shop_price));
+
+            $("#no_shipping_price_rmb").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , Math.round(no_shipping_cost_pu_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100, 
+            Math.round(no_shipping_cost_pu_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100, 
+            Math.round(no_shipping_cost_te_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100, 
+            Math.round(no_shipping_cost_te_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100));
+
+            var no_shipping_cost_pu_home_service_charge = Math.round(no_shipping_cost_pu_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100*0.08; 
+            var no_shipping_cost_pu_shop_service_charge = Math.round(no_shipping_cost_pu_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100*0.08; 
+            var no_shipping_cost_te_home_service_charge = Math.round(no_shipping_cost_te_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100*0.08; 
+            var no_shipping_cost_te_shop_service_charge = Math.round(no_shipping_cost_te_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100*0.08;
+
+            $("#no_shipping_service_charge").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , no_shipping_cost_pu_home_service_charge, 
+            no_shipping_cost_pu_shop_service_charge, 
+            no_shipping_cost_te_home_service_charge, 
+            no_shipping_cost_te_shop_service_charge));
+
+            $("#no_shipping_profit").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , Math.round(((no_shipping_cost_pu_home_price - no_shipping_cost_pu_home)/exchange_rate - no_shipping_cost_pu_home_service_charge)*100)/100, 
+            Math.round(((no_shipping_cost_pu_shop_price - no_shipping_cost_pu_shop)/exchange_rate - no_shipping_cost_pu_shop_service_charge)*100)/100, 
+            Math.round(((no_shipping_cost_te_home_price - no_shipping_cost_te_home)/exchange_rate - no_shipping_cost_te_home_service_charge)*100)/100, 
+            Math.round(((no_shipping_cost_te_shop_price - no_shipping_cost_te_shop)/exchange_rate - no_shipping_cost_te_shop_service_charge)*100)/100));
+
+
+        }
+
+        countFinal();
+
+        $("#btn").on('click', function(){
+            countFinal();
+        })
+
+        $(document).keyup(function(event){
+                if(event.keyCode ==13){
+                    $("#btn").trigger("click");
+                }
+            });
+
+    </script>
+</html>

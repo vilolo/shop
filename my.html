@@ -9,7 +9,7 @@
             <table>
                 <tr>
                     <td>商品成本(RMB)</td>
-                    <td>: <input id="cost" value="18"></td>
+                    <td>: <input id="cost" value="20"></td>
                 </tr>
                 <tr>
                     <td>数量</td>
@@ -17,15 +17,15 @@
                 </tr>
                 <tr>
                     <td>快递费(RMB)</td>
-                    <td>: <input id="expressFee" value="16"></td>
+                    <td>: <input id="expressFee" value="15"></td>
                 </tr>
                 <tr>
                     <td>盈利比例</td>
-                    <td>: <input id="rate" value="10">%</td>
+                    <td>: <input id="rate" value="15">%</td>
                 </tr>
                 <tr>
                     <td>单件重量(KG)</td>
-                    <td>: <input id="weight" value="0.4"> 总重量： <span class="totalWeight">0.4</span></td>
+                    <td>: <input id="weight" value="0.5"> 总重量： <span class="totalWeight">0.5</span></td>
                 </tr>
                 <tr>
                     <td></td>
@@ -50,9 +50,10 @@
             <hr>
             <div>包邮总成本： <span id="totalCostFreeShip" style="color: red">0</span> RM</div><br>
             <div>不包邮总成本（-4.8）： <span id="totalCostShip" style="color: red">0</span> RM</div><br>
-            <div>得出包邮单价(<span class='rate_tip'></span>%)： <span id="res" style="color: red">0</span> RM</div>
-            <div>大概扣取佣金(除运费的5%)： <span id="commission" style="color: red">0</span> RM</div>
-            <div>最终得到： <span id="finalGet" style="color: red">0</span> CNY</div>
+            <div>得出包邮单价(<span class='rate_tip'></span>%)： <span id="res" style="color: red">0</span> RM</div><br>
+            <div>佣金+服务费(实付金额的6%+2%)： <span id="commission" style="color: red">0</span> RM</div>
+            <div>包邮净利润： <span id="finalGet" style="color: red">0</span> CNY</div>
+            <div>不包邮净利润： <span id="finalGetShip" style="color: red">0</span> CNY</div>
         </div>
     </body>
     <script>
@@ -71,6 +72,8 @@
                 window.open("https://www.1688.com").location;
                 window.open("https://shopee.com.my").location;
                 window.open("https://fanyi.baidu.com/").location;
+                window.open("https://www.taobao.com/").location;
+                window.open("https://www.dianxiaomi.com/crawl/index.htm").location;
                 window.open("https://docs.google.com/spreadsheets/d/13DCV3qM64u4vf9EjIpXBXCs7oF8c60-2xPWqSrtTIVY/edit?ts=5d3c11d2#gid=0").location;
             });
 
@@ -145,12 +148,10 @@
                 $("#res").text("A区：" + finalPriceA + ", B区：" + finalPriceB + "， C区" + finalPriceC)
                 $(".rate_tip").text($("#rate").val())
 
-                var commissionA = Math.round((finalPriceA-shipFee)*5)/100
-                var commissionB = Math.round((finalPriceB-shipFee)*5)/100
-                var commissionC = Math.round((finalPriceC-shipFee)*5)/100
-                $("#commission").text("A区：" + commissionA + 
-                    ", B区：" + commissionB + 
-                    "， C区" + commissionC)
+                var commissionA = Math.round(finalPriceA*8)/100
+                var commissionB = Math.round(finalPriceB*8)/100
+                var commissionC = Math.round(finalPriceC*8)/100
+                $("#commission").text("A区：" + commissionA + "，B区：" + commissionB + "，C区：" + commissionC)
 
                 var finalGetA = finalPriceA - commissionA - totalCostA
                 var finalGetB = finalPriceB - commissionB - totalCostB
@@ -158,6 +159,10 @@
                 $("#finalGet").text("A区：" + Math.round(finalGetA*rmToRmb*100)/100 + "(" + Math.round(finalGetA/totalCostA*100) + "%)" +
                     ", B区：" + Math.round(finalGetB*rmToRmb*100)/100 + "(" + Math.round(finalGetB/totalCostB*100) + "%)" + 
                     "， C区" + Math.round(finalGetC*rmToRmb*100)/100 + "(" + Math.round(finalGetC/totalCostC*100) + "%)")
+
+                $("#finalGetShip").text("A区：" + Math.round((finalGetA+shipFee)*rmToRmb*100)/100 + "(" + Math.round((finalGetA+shipFee)/totalCostA*100) + "%)" +
+                    ", B区：" + Math.round((finalGetB+shipFee)*rmToRmb*100)/100 + "(" + Math.round((finalGetB+shipFee)/totalCostB*100) + "%)" + 
+                    "， C区" + Math.round((finalGetC+shipFee)*rmToRmb*100)/100 + "(" + Math.round((finalGetC+shipFee)/totalCostC*100) + "%)")
             })
 
             $(document).keyup(function(event){
