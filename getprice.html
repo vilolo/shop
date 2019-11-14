@@ -1,33 +1,33 @@
 <html>
     <body>
-        <div style="padding-left: 100px; padding-bottom: 30px; padding-top: 30px;">
-            <label><input type="radio" name="proform" value="my"> 马来 </label>
+        <div style="padding-left: 100px; padding-bottom: 30px;">
+            <label><input type="radio" name="proform" disabled value="my"> 马来(暂未完成) </label>
             <label><input type="radio" name="proform" value="tw"> 台湾 </label>
             <br><br>
-            1RMB = <input id="rmbtomyr" value="0.5865">马来币
+            1RMB = <input id="rmbtomyr" value="0.5909">马来币
             <br>
-            1RMB = <input id="rmbtotwd" value="4.3822">新台币
-            <br><br>
+            1RMB = <input id="rmbtotwd" value="4.3172">新台币
+            <br>
             <button id="btn">按回车计算</button>
         </div>
 
         <table>
             <tr>
-                <td>货源成本</td><td>：<input id="cost" value="20"> RMB</td>
+                <td>货源成本</td><td>：<input id="cost" value="23"> RMB</td>
             </tr><tr>
                 <td>数量</td><td>：<input id="amount" value="1"></td>
             </tr><tr>
-                <td>国内运费</td><td>：<input id="domestic_shipping" value="15"> RMB</td>
+                <td>国内运费</td><td>：<input id="domestic_shipping" value="10"> RMB</td>
             </tr><tr>
-                <td>单个重量</td><td>：<input id="single_weight" value="0.5"> KG (总重量：<span id="total_weight">0</span>KG)</td>
+                <td>单个重量</td><td>：<input id="single_weight" value="0.15"> KG (总重量：<span id="total_weight">0</span>KG)</td>
             </tr><tr>
                 <td>国际实际运费</td><td>：<span id="international_shipping">0</span> <span class="unit">--</span></td>
             </tr><tr>
-                <td>买家支付运费</td><td>：<input id="buyer_shipping" value="60"> <span class="unit">--</span></td>
+                <td>买家支付运费</td><td>：店配 <input id="buyer_shipping" value="60"> 宅配 <input id="buyer_shipping_home" value="70"> <span class="unit">--</span></td>
             </tr><tr>
-                <td>盈利比率</td><td>：<input id="profit_ratio" value="20">%</td>
+                <td>盈利比率</td><td>：<input id="profit_ratio" value="28">%</td>
             </tr><tr>
-                <td>+++包邮+++</td><td>++++包邮++++</td>
+                <td>+++包邮+++</td><td>++++包邮++++++++++++++++++++++++</td>
             </tr><tr>
                 <td>包邮总成本</td><td><span id="no_shipping_cost">0</span> <span class="unit">--</span> <br>== (<span id="no_shipping_cost_rmb">0</span> RMB)</td>
             </tr><tr>
@@ -37,11 +37,11 @@
             </tr><tr>
                 <td>预计收益</td><td>：<span id="no_shipping_profit">0</span> RMB</td>
             </tr><tr>
-                <td>+++不包邮+++</td><td>++++不包邮++++</td>
+                <td>+++不包邮+++</td><td>++++不包邮++++++++++++++++++++++++</td>
             </tr><tr>
-                <td>不包邮总成本</td><td><span id="shipping_cost">0</span> <span class="unit">--</span> <br>== (<span id="shipping_price_rmb">0</span> RMB)</td>
+                <td>不包邮总成本</td><td><span id="shipping_cost">0</span> <span class="unit">--</span> <br>== (<span id="shipping_cost_rmb">0</span> RMB)</td>
             </tr><tr>
-                <td>得出不包邮定价</td><td><span id="shipping_price">0</span> <span class="unit">--</span> <br>== (<span id="shipping_price_rmb">0</span> RMB)</td>
+                <td style="border: 1px #000 solid">得出不包邮定价</td><td style="border: 1px #000 solid; color: red"><span id="shipping_price">0</span> <span class="unit">--</span> <br>== (<span id="shipping_price_rmb">0</span> RMB)</td>
             </tr><tr>
                 <td>佣金加服务费（6%+2%）</td><td>：<span id="shipping_service_charge">0</span> RMB</td>
             </tr><tr>
@@ -130,20 +130,25 @@
         function countFinal(){
             var rmb_cost = (parseFloat(amount*$('#cost').val())+parseFloat($('#domestic_shipping').val()));
 
-            //不包邮成本
-            no_shipping_cost_pu_home = rmb_cost*exchange_rate + pu_home_shipping;
-            no_shipping_cost_pu_shop = rmb_cost*exchange_rate + pu_shop_shipping;
-            no_shipping_cost_te_home = rmb_cost*exchange_rate + te_home_shipping;
-            no_shipping_cost_te_shop = rmb_cost*exchange_rate + te_shop_shipping;
+            //包邮成本
+            no_shipping_cost_pu_home = Math.round(rmb_cost*exchange_rate*100)/100 + pu_home_shipping;
+            no_shipping_cost_pu_shop = Math.round(rmb_cost*exchange_rate*100)/100 + pu_shop_shipping;
+            no_shipping_cost_te_home = Math.round(rmb_cost*exchange_rate*100)/100 + te_home_shipping;
+            no_shipping_cost_te_shop = Math.round(rmb_cost*exchange_rate*100)/100 + te_shop_shipping;
 
             $("#no_shipping_cost").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
             , no_shipping_cost_pu_home, no_shipping_cost_pu_shop, no_shipping_cost_te_home, no_shipping_cost_te_shop));
 
+            no_shipping_cost_pu_home_rmb = Math.round(no_shipping_cost_pu_home/exchange_rate*100)/100; 
+            no_shipping_cost_pu_shop_rmb = Math.round(no_shipping_cost_pu_shop/exchange_rate*100)/100; 
+            no_shipping_cost_te_home_rmb = Math.round(no_shipping_cost_te_home/exchange_rate*100)/100; 
+            no_shipping_cost_te_shop_rmb = Math.round(no_shipping_cost_te_shop/exchange_rate*100)/100;
+
             $("#no_shipping_cost_rmb").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
-            , Math.round(no_shipping_cost_pu_home/exchange_rate*100)/100, 
-            Math.round(no_shipping_cost_pu_shop/exchange_rate*100)/100, 
-            Math.round(no_shipping_cost_te_home/exchange_rate*100)/100, 
-            Math.round(no_shipping_cost_te_shop/exchange_rate*100)/100));
+            , no_shipping_cost_pu_home_rmb,
+            no_shipping_cost_pu_shop_rmb,
+            no_shipping_cost_te_home_rmb,
+            no_shipping_cost_te_shop_rmb));
 
             
             var no_shipping_cost_pu_home_price = Math.round(no_shipping_cost_pu_home*(100+parseInt($('#profit_ratio').val())))/100;
@@ -163,10 +168,10 @@
             Math.round(no_shipping_cost_te_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100, 
             Math.round(no_shipping_cost_te_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100));
 
-            var no_shipping_cost_pu_home_service_charge = Math.round(no_shipping_cost_pu_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100*0.08; 
-            var no_shipping_cost_pu_shop_service_charge = Math.round(no_shipping_cost_pu_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100*0.08; 
-            var no_shipping_cost_te_home_service_charge = Math.round(no_shipping_cost_te_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100*0.08; 
-            var no_shipping_cost_te_shop_service_charge = Math.round(no_shipping_cost_te_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100*0.08;
+            var no_shipping_cost_pu_home_service_charge = Math.round(no_shipping_cost_pu_home/exchange_rate*(100+parseInt($('#profit_ratio').val()))*0.08)/100; 
+            var no_shipping_cost_pu_shop_service_charge = Math.round(no_shipping_cost_pu_shop/exchange_rate*(100+parseInt($('#profit_ratio').val()))*0.08)/100; 
+            var no_shipping_cost_te_home_service_charge = Math.round(no_shipping_cost_te_home/exchange_rate*(100+parseInt($('#profit_ratio').val()))*0.08)/100; 
+            var no_shipping_cost_te_shop_service_charge = Math.round(no_shipping_cost_te_shop/exchange_rate*(100+parseInt($('#profit_ratio').val()))*0.08)/100;
 
             $("#no_shipping_service_charge").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
             , no_shipping_cost_pu_home_service_charge, 
@@ -174,13 +179,93 @@
             no_shipping_cost_te_home_service_charge, 
             no_shipping_cost_te_shop_service_charge));
 
-            $("#no_shipping_profit").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
-            , Math.round(((no_shipping_cost_pu_home_price - no_shipping_cost_pu_home)/exchange_rate - no_shipping_cost_pu_home_service_charge)*100)/100, 
-            Math.round(((no_shipping_cost_pu_shop_price - no_shipping_cost_pu_shop)/exchange_rate - no_shipping_cost_pu_shop_service_charge)*100)/100, 
-            Math.round(((no_shipping_cost_te_home_price - no_shipping_cost_te_home)/exchange_rate - no_shipping_cost_te_home_service_charge)*100)/100, 
-            Math.round(((no_shipping_cost_te_shop_price - no_shipping_cost_te_shop)/exchange_rate - no_shipping_cost_te_shop_service_charge)*100)/100));
+            //收益
+            no_shipping_cost_pu_home_profit = Math.round(((no_shipping_cost_pu_home_price - no_shipping_cost_pu_home)/exchange_rate - no_shipping_cost_pu_home_service_charge)*100)/100; 
+            no_shipping_cost_pu_shop_profit = Math.round(((no_shipping_cost_pu_shop_price - no_shipping_cost_pu_shop)/exchange_rate - no_shipping_cost_pu_shop_service_charge)*100)/100; 
+            no_shipping_cost_te_home_profit = Math.round(((no_shipping_cost_te_home_price - no_shipping_cost_te_home)/exchange_rate - no_shipping_cost_te_home_service_charge)*100)/100; 
+            no_shipping_cost_te_shop_profit = Math.round(((no_shipping_cost_te_shop_price - no_shipping_cost_te_shop)/exchange_rate - no_shipping_cost_te_shop_service_charge)*100)/100;
 
+            $("#no_shipping_profit").text(String.format("普货-宅配：{0}({4}%)，普货-店配：{1}({5}%), 特货-宅配：{2}({6}%)，特货-店配：{3}({7}%),"
+            , no_shipping_cost_pu_home_profit, 
+            no_shipping_cost_pu_shop_profit,
+            no_shipping_cost_te_home_profit,
+            no_shipping_cost_te_shop_profit,
+            
+            Math.round(no_shipping_cost_pu_home_profit/no_shipping_cost_pu_home_rmb*10000)/100, 
+            Math.round(no_shipping_cost_pu_shop_profit/no_shipping_cost_pu_shop_rmb*10000)/100,
+            Math.round(no_shipping_cost_te_home_profit/no_shipping_cost_te_home_rmb*10000)/100,
+            Math.round(no_shipping_cost_te_shop_profit/no_shipping_cost_te_shop_rmb*10000)/100));
 
+            //不包邮
+            shipping_cost_pu_home = Math.round((rmb_cost*exchange_rate + pu_home_shipping - $("#buyer_shipping_home").val())*100)/100;
+            shipping_cost_pu_shop = Math.round((rmb_cost*exchange_rate + pu_shop_shipping - $("#buyer_shipping").val())*100)/100;
+            shipping_cost_te_home = Math.round((rmb_cost*exchange_rate + te_home_shipping - $("#buyer_shipping_home").val())*100)/100;
+            shipping_cost_te_shop = Math.round((rmb_cost*exchange_rate + te_shop_shipping - $("#buyer_shipping").val())*100)/100;
+
+            $("#shipping_cost").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , shipping_cost_pu_home, shipping_cost_pu_shop, shipping_cost_te_home, shipping_cost_te_shop));
+
+            shipping_cost_pu_home_rmb = Math.round(shipping_cost_pu_home/exchange_rate*100)/100; 
+            shipping_cost_pu_shop_rmb = Math.round(shipping_cost_pu_shop/exchange_rate*100)/100; 
+            shipping_cost_te_home_rmb = Math.round(shipping_cost_te_home/exchange_rate*100)/100; 
+            shipping_cost_te_shop_rmb = Math.round(shipping_cost_te_shop/exchange_rate*100)/100;
+
+            $("#shipping_cost_rmb").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , shipping_cost_pu_home_rmb,
+            shipping_cost_pu_shop_rmb,
+            shipping_cost_te_home_rmb,
+            shipping_cost_te_shop_rmb));
+
+            
+            var shipping_cost_pu_home_price = Math.round(shipping_cost_pu_home*(100+parseInt($('#profit_ratio').val())))/100;
+            var shipping_cost_pu_shop_price = Math.round(shipping_cost_pu_shop*(100+parseInt($('#profit_ratio').val())))/100; 
+            var shipping_cost_te_home_price = Math.round(shipping_cost_te_home*(100+parseInt($('#profit_ratio').val())))/100; 
+            var shipping_cost_te_shop_price = Math.round(shipping_cost_te_shop*(100+parseInt($('#profit_ratio').val())))/100;
+
+            $("#shipping_price").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , shipping_cost_pu_home_price, 
+            shipping_cost_pu_shop_price, 
+            shipping_cost_te_home_price, 
+            shipping_cost_te_shop_price));
+
+            shipping_cost_pu_home_price_rmb = Math.round(shipping_cost_pu_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100; 
+            shipping_cost_pu_shop_price_rmb = Math.round(shipping_cost_pu_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100; 
+            shipping_cost_te_home_price_rmb = Math.round(shipping_cost_te_home/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100; 
+            shipping_cost_te_shop_price_rmb = Math.round(shipping_cost_te_shop/exchange_rate*(100+parseInt($('#profit_ratio').val())))/100;
+
+            $("#shipping_price_rmb").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , shipping_cost_pu_home_price_rmb,
+            shipping_cost_pu_shop_price_rmb,
+            shipping_cost_te_home_price_rmb,
+            shipping_cost_te_shop_price_rmb));
+
+            var shipping_cost_pu_home_service_charge = Math.round(shipping_cost_pu_home/exchange_rate*(100+parseInt($('#profit_ratio').val()))*0.08)/100; 
+            var shipping_cost_pu_shop_service_charge = Math.round(shipping_cost_pu_shop/exchange_rate*(100+parseInt($('#profit_ratio').val()))*0.08)/100; 
+            var shipping_cost_te_home_service_charge = Math.round(shipping_cost_te_home/exchange_rate*(100+parseInt($('#profit_ratio').val()))*0.08)/100; 
+            var shipping_cost_te_shop_service_charge = Math.round(shipping_cost_te_shop/exchange_rate*(100+parseInt($('#profit_ratio').val()))*0.08)/100;
+
+            $("#shipping_service_charge").text(String.format("普货-宅配：{0}，普货-店配：{1}, 特货-宅配：{2}，特货-店配：{3},"
+            , shipping_cost_pu_home_service_charge, 
+            shipping_cost_pu_shop_service_charge, 
+            shipping_cost_te_home_service_charge, 
+            shipping_cost_te_shop_service_charge));
+
+            //收益
+            shipping_cost_pu_home_profit = Math.round(((shipping_cost_pu_home_price - shipping_cost_pu_home)/exchange_rate - shipping_cost_pu_home_service_charge)*100)/100; 
+            shipping_cost_pu_shop_profit = Math.round(((shipping_cost_pu_shop_price - shipping_cost_pu_shop)/exchange_rate - shipping_cost_pu_shop_service_charge)*100)/100; 
+            shipping_cost_te_home_profit = Math.round(((shipping_cost_te_home_price - shipping_cost_te_home)/exchange_rate - shipping_cost_te_home_service_charge)*100)/100; 
+            shipping_cost_te_shop_profit = Math.round(((shipping_cost_te_shop_price - shipping_cost_te_shop)/exchange_rate - shipping_cost_te_shop_service_charge)*100)/100;
+
+            $("#shipping_profit").text(String.format("普货-宅配：{0}({4}%)，普货-店配：{1}({5}%), 特货-宅配：{2}({6}%)，特货-店配：{3}({7}%),"
+            , shipping_cost_pu_home_profit,
+            shipping_cost_pu_shop_profit,
+            shipping_cost_te_home_profit,
+            shipping_cost_te_shop_profit,
+
+            Math.round(shipping_cost_pu_home_profit/shipping_cost_pu_home_rmb*10000)/100,
+            Math.round(shipping_cost_pu_shop_profit/shipping_cost_pu_shop_rmb*10000)/100,
+            Math.round(shipping_cost_te_home_profit/shipping_cost_te_home_rmb*10000)/100,
+            Math.round(shipping_cost_te_shop_profit/shipping_cost_te_shop_rmb*10000)/100));
         }
 
         countFinal();

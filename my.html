@@ -9,7 +9,7 @@
             <table>
                 <tr>
                     <td>商品成本(RMB)</td>
-                    <td>: <input id="cost" value="20"></td>
+                    <td>: <input id="cost" value="8"></td>
                 </tr>
                 <tr>
                     <td>数量</td>
@@ -17,15 +17,15 @@
                 </tr>
                 <tr>
                     <td>快递费(RMB)</td>
-                    <td>: <input id="expressFee" value="15"></td>
+                    <td>: <input id="expressFee" value="12"></td>
                 </tr>
                 <tr>
                     <td>盈利比例</td>
-                    <td>: <input id="rate" value="15">%</td>
+                    <td>: <input id="rate" value="18">%</td>
                 </tr>
                 <tr>
                     <td>单件重量(KG)</td>
-                    <td>: <input id="weight" value="0.5"> 总重量： <span class="totalWeight">0.5</span></td>
+                    <td>: <input id="weight" value="0.15"> 总重量： <span class="totalWeight">0.15</span></td>
                 </tr>
                 <tr>
                     <td></td>
@@ -44,17 +44,32 @@
         </div>
         <div>
             <hr>
-            <div>======比例======</div>
-        </div>
-        <div>
-            <hr>
-            <div>包邮总成本： <span id="totalCostFreeShip" style="color: red">0</span> RM</div><br>
-            <div>不包邮总成本（-4.8）： <span id="totalCostShip" style="color: red">0</span> RM</div><br>
+            <div>============================== 包邮 =====================================</div>
+
+            <div>包邮总成本： <span id="totalCostFreeShip">0</span> RM</div><br>
             <div>得出包邮单价(<span class='rate_tip'></span>%)： <span id="res" style="color: red">0</span> RM</div><br>
-            <div>佣金+服务费(实付金额的6%+2%)： <span id="commission" style="color: red">0</span> RM</div>
-            <div>包邮净利润： <span id="finalGet" style="color: red">0</span> CNY</div>
-            <div>不包邮净利润： <span id="finalGetShip" style="color: red">0</span> CNY</div>
+            <div>佣金+服务费(实付金额的6%+2%)： <span id="commission">0</span> RM</div>
+            <div>包邮净利润： <span id="finalGet">0</span> CNY</div><br>
+
+            <div>============================== 不包邮 =====================================</div>
+
+            <div>不包邮总成本（-3.8/4.8）： <span id="totalCostShip">0</span> RM</div><br>
+            <div>得出不包邮单价(<span class='rate_tip'></span>%)： <span id="resShipping" style="color: red">0</span> RM</div><br>
+            <div>佣金+服务费(实付金额的6%+2%)： <span id="commissionShip">0</span> RM</div>
+            <div>不包邮净利润： <span id="finalGetShip">0</span> CNY</div>
         </div>
+
+        <hr>
+        <div>
+            <div>================================打开链接=====================================</div>
+            <button class="btn-my">==打开MY==</button> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <button class="btn-tw">==打开TW==</button>
+            <br><br>
+            <div>
+                <textarea class="tbox" style="width:600px; height:300px; vertical-align: top;"></textarea>
+            </div>
+        </div>
+
     </body>
     <script>
         String.prototype.format = function(){
@@ -63,18 +78,24 @@
         }
 
         $(function(){
-            var rmToRmb = 1.6873
-            var rmbToRm = 0.5927
-            var shipFee = 4.8
+            var rmToRmb = 1.6873;
+            var rmbToRm = 0.5927;
+            var shipFeeA = 3.8;
+            var shipFeeBC = 4.8;
 
             $("#btnWeb").on("click", function(){
+                window.open("http://198.35.45.87:7090/shop/getprice.html").location;
                 window.open("https://seller.shopee.com.my").location;
-                window.open("https://www.1688.com").location;
+                window.open("https://seller.shopee.com.my/portal/marketing/pas/assembly/889617?from=1570291200&to=1570377599&group=yesterday").location;
                 window.open("https://shopee.com.my").location;
-                window.open("https://fanyi.baidu.com/").location;
+                window.open("https://www.1688.com").location;
                 window.open("https://www.taobao.com/").location;
+                window.open("https://seller.xiapi.shopee.cn/").location;
+                window.open("https://xiapi.xiapibuy.com/").location;
+                window.open("https://translate.google.cn/").location;
+                window.open("https://translate.google.cn/").location;
                 window.open("https://www.dianxiaomi.com/crawl/index.htm").location;
-                window.open("https://docs.google.com/spreadsheets/d/13DCV3qM64u4vf9EjIpXBXCs7oF8c60-2xPWqSrtTIVY/edit?ts=5d3c11d2#gid=0").location;
+                //window.open("https://docs.google.com/spreadsheets/d/13DCV3qM64u4vf9EjIpXBXCs7oF8c60-2xPWqSrtTIVY/edit?ts=5d3c11d2#gid=0").location;
             });
 
             function countFree(){
@@ -132,14 +153,18 @@
                 parseFloat($("#myC").val())
                 )
                 
-                totalCostA = Math.round(totalCostA*100)/100
-                totalCostB = Math.round(totalCostB*100)/100
-                totalCostC = Math.round(totalCostC*100)/100
+                totalCostA = Math.round(totalCostA*100)/100;
+                totalCostB = Math.round(totalCostB*100)/100;
+                totalCostC = Math.round(totalCostC*100)/100;
+
+                totalCostShipA = Math.round((totalCostA-shipFeeA)*100)/100;
+                totalCostShipB = Math.round((totalCostB-shipFeeBC)*100)/100;
+                totalCostShipC = Math.round((totalCostC-shipFeeBC)*100)/100;
 
                 $("#totalCostFreeShip").text("A区：" + totalCostA + ", B区：" + totalCostB + "， C区" + totalCostC)
-                $("#totalCostShip").text("A区：" + Math.round((totalCostA-shipFee)*100)/100 + 
-                    ", B区：" + Math.round((totalCostB-shipFee)*100)/100 + 
-                    "， C区" + Math.round((totalCostC-shipFee)*100)/100)
+                $("#totalCostShip").text("A区：" + totalCostShipA + 
+                    ", B区：" + totalCostShipB + 
+                    "， C区" + totalCostShipC)
 
                 var finalPriceA = Math.round(totalCostA*(100+parseFloat($("#rate").val())))/100
                 var finalPriceB = Math.round(totalCostB*(100+parseFloat($("#rate").val())))/100
@@ -147,6 +172,13 @@
 
                 $("#res").text("A区：" + finalPriceA + ", B区：" + finalPriceB + "， C区" + finalPriceC)
                 $(".rate_tip").text($("#rate").val())
+
+                var finalPriceShipA = Math.round(totalCostShipA*(100+parseFloat($("#rate").val())))/100
+                var finalPriceShipB = Math.round(totalCostShipB*(100+parseFloat($("#rate").val())))/100
+                var finalPriceShipC = Math.round(totalCostShipC*(100+parseFloat($("#rate").val())))/100
+
+                $("#resShipping").text("A区：" + finalPriceShipA + ", B区：" + finalPriceShipB + "， C区" + finalPriceShipC)
+
 
                 var commissionA = Math.round(finalPriceA*8)/100
                 var commissionB = Math.round(finalPriceB*8)/100
@@ -160,9 +192,17 @@
                     ", B区：" + Math.round(finalGetB*rmToRmb*100)/100 + "(" + Math.round(finalGetB/totalCostB*100) + "%)" + 
                     "， C区" + Math.round(finalGetC*rmToRmb*100)/100 + "(" + Math.round(finalGetC/totalCostC*100) + "%)")
 
-                $("#finalGetShip").text("A区：" + Math.round((finalGetA+shipFee)*rmToRmb*100)/100 + "(" + Math.round((finalGetA+shipFee)/totalCostA*100) + "%)" +
-                    ", B区：" + Math.round((finalGetB+shipFee)*rmToRmb*100)/100 + "(" + Math.round((finalGetB+shipFee)/totalCostB*100) + "%)" + 
-                    "， C区" + Math.round((finalGetC+shipFee)*rmToRmb*100)/100 + "(" + Math.round((finalGetC+shipFee)/totalCostC*100) + "%)")
+                var commissionShipA = Math.round(finalPriceShipA*8)/100
+                var commissionShipB = Math.round(finalPriceShipB*8)/100
+                var commissionShipC = Math.round(finalPriceShipC*8)/100
+                $("#commissionShip").text("A区：" + commissionShipA + "，B区：" + commissionShipB + "，C区：" + commissionShipC)
+
+                var finalGetShipA = finalPriceShipA - commissionShipA - totalCostShipA
+                var finalGetShipB = finalPriceShipB - commissionShipB - totalCostShipB
+                var finalGetShipC = finalPriceShipC - commissionShipC - totalCostShipC
+                $("#finalGetShip").text("A区：" + Math.round((finalGetShipA)*rmToRmb*100)/100 + "(" + Math.round((finalGetShipA)/totalCostShipA*100) + "%)" +
+                    ", B区：" + Math.round((finalGetShipB)*rmToRmb*100)/100 + "(" + Math.round((finalGetShipB)/totalCostShipB*100) + "%)" + 
+                    "， C区" + Math.round((finalGetShipC)*rmToRmb*100)/100 + "(" + Math.round((finalGetShipC)/totalCostShipC*100) + "%)")
             })
 
             $(document).keyup(function(event){
@@ -171,7 +211,30 @@
                 }
             });
 
+            $("#btn").trigger("click");
+
             countFree();
+        })
+    </script>
+
+    <!-- 打开链接 -->
+    <script>
+        $(".btn-my").on('click', function(){
+            vlist = $('.tbox').val().split("\n");
+
+            for(i=0; i<vlist.length; i++){
+                src = "https://shopee.com.my/search?keyword="+vlist[i];
+                window.open(src).location;
+            }
+        })
+
+        $(".btn-tw").on('click', function(){
+            vlist = $('.tbox').val().split("\n");
+
+            for(i=0; i<vlist.length; i++){
+                src = "https://xiapi.xiapibuy.com/search?keyword="+vlist[i];
+                window.open(src).location;
+            }
         })
     </script>
 </html>
