@@ -9,19 +9,19 @@
             <table>
                 <tr>
                     <td>商品成本(RMB)</td>
-                    <td>: <input id="cost" value="8"></td>
+                    <td>: <input id="cost" type="number" value="8"></td>
                 </tr>
                 <tr>
                     <td>数量</td>
-                    <td>: <input id="amount" value="1"></td>
+                    <td>: <input id="amount" type="number" value="1"></td>
                 </tr>
                 <tr>
                     <td>快递费(RMB)</td>
-                    <td>: <input id="expressFee" value="12"></td>
+                    <td>: <input id="expressFee" type="number" value="10"></td>
                 </tr>
                 <tr>
                     <td>盈利比例</td>
-                    <td>: <input id="rate" value="18">%</td>
+                    <td>: <input id="rate" type="number" value="20">%</td>
                 </tr>
                 <tr>
                     <td>单件重量(KG)</td>
@@ -53,7 +53,7 @@
 
             <div>============================== 不包邮 =====================================</div>
 
-            <div>不包邮总成本（-3.8/4.8）： <span id="totalCostShip">0</span> RM</div><br>
+            <div>不包邮总成本（-<span class="freeA">0</span>/<span class="freeBC">0</span>）： <span id="totalCostShip">0</span> RM</div><br>
             <div>得出不包邮单价(<span class='rate_tip'></span>%)： <span id="resShipping" style="color: red">0</span> RM</div><br>
             <div>佣金+服务费(实付金额的6%+2%)： <span id="commissionShip">0</span> RM</div>
             <div>不包邮净利润： <span id="finalGetShip">0</span> CNY</div>
@@ -80,21 +80,27 @@
         $(function(){
             var rmToRmb = 1.6873;
             var rmbToRm = 0.5927;
-            var shipFeeA = 3.8;
-            var shipFeeBC = 4.8;
+            var shipFeeA = 3.50;
+            var shipFeeBC = 4.00;
+
+            $('.freeA').html(shipFeeA);
+            $('.freeBC').html(shipFeeBC);
 
             $("#btnWeb").on("click", function(){
                 window.open("http://198.35.45.87:7090/shop/getprice.html").location;
-                window.open("https://seller.shopee.com.my").location;
-                window.open("https://seller.shopee.com.my/portal/marketing/pas/assembly/889617?from=1570291200&to=1570377599&group=yesterday").location;
+                window.open("https://seller.my.shopee.cn").location;
+                window.open("https://seller.my.shopee.cn/webchat/conversations").location;
                 window.open("https://shopee.com.my").location;
                 window.open("https://www.1688.com").location;
                 window.open("https://www.taobao.com/").location;
                 window.open("https://seller.xiapi.shopee.cn/").location;
+				window.open("https://seller.xiapi.shopee.cn/webchat/conversations").location;
                 window.open("https://xiapi.xiapibuy.com/").location;
                 window.open("https://translate.google.cn/").location;
                 window.open("https://translate.google.cn/").location;
                 window.open("https://www.dianxiaomi.com/crawl/index.htm").location;
+                window.open("https://trends.google.com/trends/?geo=TW").location;
+                window.open("https://ads.google.com/aw/keywordplanner/home?ocid=344080210&euid=346009892&__u=8083458308&uscid=344080210&__c=7608148290&authuser=1").location;
                 //window.open("https://docs.google.com/spreadsheets/d/13DCV3qM64u4vf9EjIpXBXCs7oF8c60-2xPWqSrtTIVY/edit?ts=5d3c11d2#gid=0").location;
             });
 
@@ -105,18 +111,21 @@
                 var myA = 0;
                 var myB = 0;
                 var myC = 0;
-                
-                if(weight > 0.01){
-                    myA = 3.95;
-                    myB = 4.95;
-                    myC = 4.95;
+
+                if(weight >= 0.01){
+                    myA = 3.65;
+                    myB = 4.15;
+                    myC = 4.15;
                 }
+
+                
 
                 if(overWeight > 0){
                     var part1 = 0.99 / 0.01 * 0.15;
+
                     myA += part1 + overWeight/0.01*0.15;
-                    myB += part1 + overWeight/0.01*0.15 + overWeight/0.25*1.5;
-                    myC += part1 + overWeight/0.01*0.15 + overWeight/0.25*1.5;
+                    myB += part1 + overWeight/0.01*0.15 + Math.ceil(overWeight/0.25)*1.5;
+                    myC += part1 + overWeight/0.01*0.15 + Math.ceil(overWeight/0.25)*1.5;
                 }else{
                     myA += (weight-0.01)/0.01*0.15;
                     myB += (weight-0.01)/0.01*0.15;
