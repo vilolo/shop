@@ -1,0 +1,100 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>haha</title>
+<style>
+* {
+	margin:0;
+	padding:0;
+}
+.box {
+	width:500px;
+	height:200px;
+	border:1px solid #ccc;
+	margin:100px auto;
+}
+ul {
+	width:500px;
+	height:166px;
+	list-style:none;
+}
+li {
+	width:120px;
+	height:80px;
+	background-color:cyan;
+	float:left;
+	margin-right:4px;
+	margin-bottom:4px;
+	text-align:center;
+	line-height:80px;
+}
+input {
+	width:160px;
+	height:30px;
+	margin-left:170px;
+	outline:none;
+	font-weight:700;
+	background-color:#ccc;
+}
+ul .current {
+	background-color:yellow;
+	color:#333;
+}
+</style>
+</head>
+<body>
+<div id="box" class="box">
+    <ul>
+        <li>张飞</li>
+        <li>关羽</li>
+        <li>诸葛亮</li>
+        <li>刘备</li>
+        <li>曹操</li>
+        <li>华雄</li>
+        <li>华佗</li>
+        <li>周瑜</li>
+		<li>xxx1</li>
+		<li>xxx2</li>
+		<li>xxx3</li>
+		<li>4</li>
+		<li>5</li>
+		<li>5</li>
+		<li>5</li>
+		<li>5</li>
+    </ul>
+    <input type="button" name="" id="btn" value="点击抽奖">
+</div>
+<script>
+    function my$(id) {
+        return document.getElementById(id);
+    }
+
+    var box = my$("box");
+    var list = box.children[0].children;
+
+    var num;
+
+    function open() {
+        num = parseInt(Math.random() * 13);
+        for (var i = 0; i < list.length; i++) {
+            list[i].removeAttribute("class");
+        }
+        list[num].className = "current";
+        timeID = setTimeout("open();", 10);
+    }
+
+
+    my$("btn").onclick = function() {
+
+        if (this.value == "点击抽奖") {
+            this.value = "停止抽奖";
+            open();
+        } else if (this.value == "停止抽奖") {
+            this.value = "点击抽奖";
+            clearTimeout(timeID);
+            alert("出来吧" + list[num].innerText + "");
+        }
+    };
+</script>
+</body>
+</html>
