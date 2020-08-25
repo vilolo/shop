@@ -1,0 +1,98 @@
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+</head>
+<body>
+    <div style="padding-left: 100px; padding-bottom: 30px;">
+        <div id="listBox"></div>
+        <button id="btn">按回车计算</button>
+    </div>
+    <table>
+        <tr>
+            <td>进货成本</td><td>：<input id="buyCost" value="10"> RMB</td>
+        </tr>
+        <tr>
+            <td>数量</td><td>：<input id="amount" value="1"> 个</td>
+        </tr>
+        <tr>
+            <td>国内运费</td><td>：<input id="shippingFee" value="4"> RMB</td>
+        </tr>
+        <tr>
+            <td>单个重量</td><td>：<input id="weight" value="0.08"> KG (总重量：0.15KG)</td>
+        </tr>
+        <tr>
+            <td>盈利比率</td><td>：<input id="profitRate" value="25"> %</td>
+        </tr>
+        <tr>
+            <td>-</td><td></td>
+        </tr>
+        <tr>
+            <td>+++收益+++</td><td>+++++++++++++++++++++++</td>
+        </tr>
+        <tr>
+            <td>包邮</td><td>：<span>0</span></td>
+        </tr>
+        <tr>
+            <td>不包邮</td><td>：<span style="color: red;">0</span></td>
+        </tr>
+    </table>
+
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.1.min.js"></script>
+<script>
+var serviceRate = 0.08  //6%+2%
+var list = [
+    //泰国
+    {
+        "name":"泰国站",
+        "id":"th",
+        "rmb1":4.5507,
+        "moneyName":"泰铢",
+        "zone":[
+            {
+                "zName":"zone A",
+                "firstKg":0.01,
+                "FirstKgPrice":32,
+                "followKg":0.01,
+                "followKgPrice":2,
+                "buyerPay":30,
+                "overKg":1,
+                "overFollowKg":0.01,
+                "overFollowKgPrice":2
+            },
+            {
+                "zName":"zone B",
+                "firstKg":0.01,
+                "FirstKgPrice":32,
+                "followKg":0.01,
+                "followKgPrice":2,
+                "buyerPay":30,
+                "overKg":1,
+                "overFollowKg":0.01,
+                "overFollowKgPrice":2
+            }
+        ]
+    }
+]
+
+var str= ""
+for (const key in list) {
+    if (list.hasOwnProperty(key)) {
+        const item = list[key];
+        str += '<label><input type="radio" checked name="proform" value="'+key+'"> '+
+            list[key].name+
+            ' </label>1RMB = <input id="rmbtomyr" value="'+
+            list[key].rmb1+
+            '">马来币<br>'
+    }
+}
+$('#listBox').html(str)
+
+function count(){
+    var i = $("input[name='proform']").val()
+    var param = list[i]
+    
+}
+
+</script>
+</body>
+</html>
