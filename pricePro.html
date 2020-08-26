@@ -9,7 +9,7 @@
     </div>
     <table>
         <tr>
-            <td>进货成本</td><td>：<input id="buyCost" value="10"> RMB</td>
+            <td>进货成本</td><td>：<input id="buyCost" value="5"> RMB</td>
         </tr>
         <tr>
             <td>数量</td><td>：<input id="amount" value="1"> 个</td>
@@ -18,10 +18,10 @@
             <td>国内运费</td><td>：<input id="shippingFee" value="4"> RMB</td>
         </tr>
         <tr>
-            <td>单个重量</td><td>：<input id="weight" value="0.08"> KG (总重量：0.15KG)</td>
+            <td>单个重量</td><td>：<input id="weight" value="0.05"> KG (总重量：<span id="totalKg"></span>KG)</td>
         </tr>
         <tr>
-            <td>盈利比率</td><td>：<input id="profitRate" value="25"> %</td>
+            <td>盈利比率</td><td>：<input id="profitRate" value="10"> %</td>
         </tr>
         <tr>
             <td>-</td><td></td>
@@ -30,24 +30,23 @@
             <td>+++收益+++</td><td>+++++++++++++++++++++++</td>
         </tr>
         <tr>
-            <td>包邮</td><td>：<span>0</span></td>
+            <td>包邮</td><td>：<span id="finalPriceAndFee">0</span></td>
         </tr>
         <tr>
-            <td>不包邮</td><td>：<span style="color: red;">0</span></td>
+            <td>不包邮</td><td>：<span id="finalPriceNoFee" style="color: red;">0</span></td>
         </tr>
     </table>
 
 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.1.min.js"></script>
 <script>
-var serviceRate = 0.08  //6%+2%
+var serviceRate = 8  //6%+2%
 var list = [
     //泰国
     {
         "name":"泰国站",
-        "id":"th",
         "rmb1":4.5507,
         "moneyName":"泰铢",
-        "zone":[
+        "zones":[
             {
                 "zName":"zone A",
                 "firstKg":0.01,
@@ -75,14 +74,16 @@ var list = [
 ]
 
 var str= ""
-for (const key in list) {
+var item = ""
+for (var key in list) {
     if (list.hasOwnProperty(key)) {
-        const item = list[key];
+        item = list[key];
         str += '<label><input type="radio" checked name="proform" value="'+key+'"> '+
             list[key].name+
             ' </label>1RMB = <input id="rmbtomyr" value="'+
             list[key].rmb1+
-            '">马来币<br>'
+            '">'+
+			list[key].moneyName+'<br>'
     }
 }
 $('#listBox').html(str)
@@ -90,8 +91,59 @@ $('#listBox').html(str)
 function count(){
     var i = $("input[name='proform']").val()
     var param = list[i]
-    
+    var totalKg = parseFloat($('#amount').val()*$('#weight').val())
+	$('#totalKg').text(totalKg);
+	
+	var partOneKg = 0	//超材前部分重量
+	var partTwoKg = 0	//超材后部分重量
+	var zone = ''
+	var text = ''
+	var textNoFee = ''
+	var finalPrice = 0
+	var profit = 0
+	var finalPriceNoFee = 0
+	var profitNoFee = 0
+	var partOneCost = 0
+	var partTwoCost = 0
+	var buyCost = parseFloat($('#buyCost').val()) + parseFloat($('#buyCost').val())*parseFloat($('#amount').val()) + parseFloat($('#shippingFee').val())
+	for(var key in param.zones){
+		zone = param.zones[key]
+		if(totalKg > zone.overKg){
+			partOneKg = zone.overKg
+			partTwoKg = totalKg - zone.overKg
+		}else{
+			partOneKg = totalKg
+		}
+		partOneCost = zone.FirstKgPrice + (partOneKg - zone.firstKg)/zone.followKg*zone.followKgPrice
+		
+		if(partTwoKg > 0){
+			partTwoCost = partTwoKg/zone.overFollowKg*zone.overFollowKgPrice
+		}
+		
+		//finalPrice = (partOneCost + partTwoCost) + finalPrice*serviceRate + finalPrice*$('#profitRate').val()/100
+		finalPrice = parseFloat((buyCost*param.rmb1 + partOneCost + partTwoCost)/(100-(parseInt(serviceRate) + parseInt($('#profitRate').val())))*100)
+		finalPrice = finalPrice.toFixed(3)
+		profit = finalPrice*$('#profitRate').val()/100
+		
+		finalPriceNoFee = parseFloat((buyCost*param.rmb1 + partOneCost - zone.buyerPay + partTwoCost)/(100-(parseInt(serviceRate) + parseInt($('#profitRate').val())))*100)
+		finalPriceNoFee = finalPriceNoFee.toFixed(3)
+		profitNoFee = finalPriceNoFee*$('#profitRate').val()/100
+		
+		text += zone.zName + ' 定价：' + finalPrice + param.moneyName + '(' + parseFloat(finalPrice/param.rmb1).toFixed(3) + 'RMB)' + '，利润：' + parseFloat(profit/param.rmb1).toFixed(3) + 'RMB)<br>'
+		textNoFee += zone.zName + ' 定价：' + finalPriceNoFee + param.moneyName + '(' + parseFloat(finalPriceNoFee/param.rmb1).toFixed(3) + 'RMB)' + '，利润：' + parseFloat(profitNoFee/param.rmb1).toFixed(3) + 'RMB)<br>'
+	}
+	
+	$('#finalPriceAndFee').html(text)
+	$('#finalPriceNoFee').html(textNoFee)
 }
+
+count()
+
+$(document).keyup(function(event){
+	if(event.keyCode ==13){
+		count()
+	}
+});
 
 </script>
 </body>
