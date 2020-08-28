@@ -4,8 +4,9 @@
 </head>
 <body>
     <div style="padding-left: 100px; padding-bottom: 30px;">
-        <div id="listBox"></div>
-        <button id="btn">按回车计算</button>
+        <div id="listBox"></div><br>
+        <button id="btn">按回车计算</button><br><br>
+		<div id="priceBox"></div>
     </div>
     <table>
         <tr>
@@ -30,36 +31,85 @@
             <td>+++收益+++</td><td>+++++++++++++++++++++++</td>
         </tr>
         <tr>
-            <td>包邮</td><td>：<span id="finalPriceAndFee">0</span></td>
-        </tr>
-        <tr>
             <td>不包邮</td><td>：<span id="finalPriceNoFee" style="color: red;">0</span></td>
+        </tr>
+		<tr>
+            <td>包邮</td><td>：<span id="finalPriceAndFee">0</span></td>
         </tr>
     </table>
 
 <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.1.1.min.js"></script>
 <script>
+// ============================ 成本 =============================
+var priceList = [
+	{
+		'name':'低',
+		'buyCost':10,
+		'amount':1,
+		'shippingFee':2,
+		'weight':0.04,
+		'profitRate':6
+	},
+	{
+		'name':'中',
+		'buyCost':10,
+		'amount':1,
+		'shippingFee':4,
+		'weight':0.04,
+		'profitRate':10
+	},
+	{
+		'name':'高',
+		'buyCost':10,
+		'amount':1,
+		'shippingFee':4,
+		'weight':0.04,
+		'profitRate':20
+	},
+]
+
+var priceBtnHtml = '';
+for(var key in priceList){
+	var isChecked = key == 1 ? 'checked' : ''
+	priceBtnHtml += '<label for="priceBtn'+key+'"><input id="priceBtn'+key+'" name="priceBtn" '+isChecked+' type="radio" value="'+key+'"> '+priceList[key].name+'</label> '
+}
+$('#priceBox').html(priceBtnHtml)
+
+var data = priceList[1]
+$('#buyCost').val(data.buyCost)
+$('#amount').val(data.amount)
+$('#shippingFee').val(data.shippingFee)
+$('#weight').val(data.weight)
+$('#profitRate').val(data.profitRate)
+
+$('input[name="priceBtn"]').on('change', function(){
+	var i = $('input[name="priceBtn"]:checked').val()
+	$('#buyCost').val(priceList[i].buyCost)
+	$('#amount').val(priceList[i].amount)
+	$('#shippingFee').val(priceList[i].shippingFee)
+	$('#weight').val(priceList[i].weight)
+	$('#profitRate').val(priceList[i].profitRate)
+	
+	count()
+})
+
+$('.priceBtn').on('click', function(){
+	changeCost($(this).attr('i'))
+	count()
+})
+
+// ============================ 计价 =============================
+
 var serviceRate = 8  //6%+2%
 var list = [
     //泰国
     {
-        "name":"泰国站",
+        "name":"泰国",
         "rmb1":4.5507,
         "moneyName":"泰铢",
         "zones":[
             {
-                "zName":"zone A",
-                "firstKg":0.01,
-                "FirstKgPrice":32,
-                "followKg":0.01,
-                "followKgPrice":2,
-                "buyerPay":30,
-                "overKg":1,
-                "overFollowKg":0.01,
-                "overFollowKgPrice":2
-            },
-            {
-                "zName":"zone B",
+                "zName":"统一",
                 "firstKg":0.01,
                 "FirstKgPrice":32,
                 "followKg":0.01,
@@ -70,7 +120,66 @@ var list = [
                 "overFollowKgPrice":2
             }
         ]
-    }
+    },
+	
+	//巴西
+	{
+        "name":"巴西",
+        "rmb1":0.8152,
+        "moneyName":"雷亚尔",
+        "zones":[
+            {
+                "zName":"统一",
+                "firstKg":0.03,
+                "FirstKgPrice":15,
+                "followKg":0.01,
+                "followKgPrice":1.4,
+                "buyerPay":10,
+                "overKg":0.1,
+                "overFollowKg":0.01,
+                "overFollowKgPrice":0.9
+            }
+        ]
+    },
+	
+	//台湾
+    {
+        "name":"台湾",
+        "rmb1":4.2736,
+        "moneyName":"新台币",
+        "zones":[
+            {
+                "zName":"统一",
+                "firstKg":0.5,
+                "FirstKgPrice":85,
+                "followKg":0.5,
+                "followKgPrice":30,
+                "buyerPay":70,
+                "overKg":1,
+                "overFollowKg":0.5,
+                "overFollowKgPrice":30
+            }
+        ]
+    },
+	//马来
+	{
+        "name":"马来",
+        "rmb1":0.6071,
+        "moneyName":"吉林特",
+        "zones":[
+            {
+                "zName":"统一",
+                "firstKg":0.01,
+                "FirstKgPrice":6.15,
+                "followKg":0.01,
+                "followKgPrice":0.15,
+                "buyerPay":6,
+                "overKg":1,
+                "overFollowKg":0.01,
+                "overFollowKgPrice":0.15
+            }
+        ]
+    },
 ]
 
 var str= ""
@@ -78,18 +187,23 @@ var item = ""
 for (var key in list) {
     if (list.hasOwnProperty(key)) {
         item = list[key];
-        str += '<label><input type="radio" checked name="proform" value="'+key+'"> '+
+		var isChecked = key == 0 ? 'checked' : ''
+        str += '<label><input type="radio" '+isChecked+' name="proform" value="'+key+'"> '+
             list[key].name+
-            ' </label>1RMB = <input id="rmbtomyr" value="'+
+            ' 1RMB = <input id="rmbtomyr" value="'+
             list[key].rmb1+
             '">'+
-			list[key].moneyName+'<br>'
+			list[key].moneyName+'</label><br>'
     }
 }
 $('#listBox').html(str)
 
+$("input[name='proform']").on('change', function(){
+	count()
+})
+
 function count(){
-    var i = $("input[name='proform']").val()
+    var i = $("input[name='proform']:checked").val()
     var param = list[i]
     var totalKg = parseFloat($('#amount').val()*$('#weight').val())
 	$('#totalKg').text(totalKg);
@@ -105,14 +219,15 @@ function count(){
 	var profitNoFee = 0
 	var partOneCost = 0
 	var partTwoCost = 0
-	var buyCost = parseFloat($('#buyCost').val()) + parseFloat($('#buyCost').val())*parseFloat($('#amount').val()) + parseFloat($('#shippingFee').val())
+	var buyCost = parseFloat($('#buyCost').val())*parseFloat($('#amount').val()) + parseFloat($('#shippingFee').val())
+
 	for(var key in param.zones){
 		zone = param.zones[key]
 		if(totalKg > zone.overKg){
 			partOneKg = zone.overKg
 			partTwoKg = totalKg - zone.overKg
 		}else{
-			partOneKg = totalKg
+			partOneKg = totalKg>zone.firstKg?totalKg:zone.firstKg
 		}
 		partOneCost = zone.FirstKgPrice + (partOneKg - zone.firstKg)/zone.followKg*zone.followKgPrice
 		
@@ -121,16 +236,18 @@ function count(){
 		}
 		
 		//finalPrice = (partOneCost + partTwoCost) + finalPrice*serviceRate + finalPrice*$('#profitRate').val()/100
-		finalPrice = parseFloat((buyCost*param.rmb1 + partOneCost + partTwoCost)/(100-(parseInt(serviceRate) + parseInt($('#profitRate').val())))*100)
+		shipFee = partOneCost + partTwoCost
+		finalPrice = parseFloat((buyCost*param.rmb1 + shipFee)/(100-(parseInt(serviceRate) + parseInt($('#profitRate').val())))*100)
 		finalPrice = finalPrice.toFixed(3)
 		profit = finalPrice*$('#profitRate').val()/100
 		
-		finalPriceNoFee = parseFloat((buyCost*param.rmb1 + partOneCost - zone.buyerPay + partTwoCost)/(100-(parseInt(serviceRate) + parseInt($('#profitRate').val())))*100)
+		shipNoFee = shipFee - zone.buyerPay
+		finalPriceNoFee = parseFloat((buyCost*param.rmb1 + shipNoFee)/(100-(parseInt(serviceRate) + parseInt($('#profitRate').val())))*100)
 		finalPriceNoFee = finalPriceNoFee.toFixed(3)
 		profitNoFee = finalPriceNoFee*$('#profitRate').val()/100
 		
-		text += zone.zName + ' 定价：' + finalPrice + param.moneyName + '(' + parseFloat(finalPrice/param.rmb1).toFixed(3) + 'RMB)' + '，利润：' + parseFloat(profit/param.rmb1).toFixed(3) + 'RMB)<br>'
-		textNoFee += zone.zName + ' 定价：' + finalPriceNoFee + param.moneyName + '(' + parseFloat(finalPriceNoFee/param.rmb1).toFixed(3) + 'RMB)' + '，利润：' + parseFloat(profitNoFee/param.rmb1).toFixed(3) + 'RMB)<br>'
+		text += zone.zName + ' 定价：' + finalPrice + param.moneyName + '(' + parseFloat(finalPrice/param.rmb1).toFixed(3) + 'RMB,【国内：'+buyCost+',国外：'+(shipFee/param.rmb1).toFixed(3)+',平台佣金：'+parseFloat(finalPrice/param.rmb1*serviceRate/100).toFixed(3)+'】)' + '，利润：' + parseFloat(profit/param.rmb1).toFixed(3) + 'RMB)<br>'
+		textNoFee += zone.zName + ' 定价：' + finalPriceNoFee + param.moneyName + '(' + parseFloat(finalPriceNoFee/param.rmb1).toFixed(3) + 'RMB,【国内：'+buyCost+',国外：'+(shipNoFee/param.rmb1).toFixed(3)+',平台佣金：'+parseFloat(finalPriceNoFee/param.rmb1*serviceRate/100).toFixed(3)+'】)' + '，利润：' + parseFloat(profitNoFee/param.rmb1).toFixed(3) + 'RMB)<br>'
 	}
 	
 	$('#finalPriceAndFee').html(text)
@@ -143,7 +260,11 @@ $(document).keyup(function(event){
 	if(event.keyCode ==13){
 		count()
 	}
-});
+})
+
+$('#btn').on('click', function(){
+	count()
+})
 
 </script>
 </body>
